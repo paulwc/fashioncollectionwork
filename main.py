@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 # import fnmatch
 
 directory = os.getcwd()
@@ -16,7 +17,7 @@ for root, dirs, files in os.walk(directory):
         if filename.endswith(('.jpg', '.jpeg', '.gif', '.png', '.tiff', '.tif')):
             files_dict[filename] = os.path.join(root, filename)
 
-with open('omeka.csv') as f, open('omeka_with_images_no_spaces.csv', 'wb') as csvwritefile:
+with open('omeka_good_encoding.csv') as f, open('omeka_with_images_good_encoding.csv', 'wb') as csvwritefile:
     csvreader = csv.DictReader(f)
     fieldnames = csvreader.fieldnames + ['Filenames']
 
@@ -26,8 +27,12 @@ with open('omeka.csv') as f, open('omeka_with_images_no_spaces.csv', 'wb') as cs
     for row in csvreader:
         # process row
 
-        # replace spaces with underscores
+        # replace spaces with underscores in accession number
         row['Accession Number'] = row['Accession Number'].replace(" ", "_")
+        # replace multiple spaces with single space in the subject field
+        row['Subject'] = re.sub('\s+', ' ', row['Subject']).strip()
+        # replace single space with semicolon space in the subject field
+        row['Subject'] = row['Subject'].replace(" ", "; ")
         acc_num = row['Accession Number']
         filenames = set()
         for key, value in files_dict.items():
